@@ -1,5 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut,
+} from 'firebase/auth';
+import {
   collection,
   DocumentData,
   Firestore,
@@ -14,11 +21,27 @@ import * as firebaseConfig from './firebase.conf.json';
 const app = initializeApp(firebaseConfig);
 const firestoreDB: Firestore = getFirestore(app);
 
-function getCollectionDocs(collectionName: string): Observable<DocumentData[]> {
+function authStateChange(callbackFn: any): any {
+  const auth = getAuth();
+  return onAuthStateChanged(auth, callbackFn);
+}
+
+function login(): void {
+  const provider = new GoogleAuthProvider();
+  provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+  const auth = getAuth();
+  signInWithPopup(auth, provider);
+}
+
+function logout(): void {
+  const auth = getAuth();
+  signOut(auth);
+}
+
+function getCollectionDocs(query: any = {}): Observable<DocumentData[]> {
   const observable$ = new Observable((subscriber: Subscriber<any>): void => {
-    const col = collection(firestoreDB, collectionName);
-    getDocs(col)
-      .then((snapshot: QuerySnapshot<DocumentData>): void => {
+    getDocs(query)
+      .then((snapshot: QuerySnapshot<any>): void => {
         const list = snapshot.docs.map(
           (doc: QueryDocumentSnapshot<DocumentData>): DocumentData => doc.data()
         );
@@ -27,11 +50,18 @@ function getCollectionDocs(collectionName: string): Observable<DocumentData[]> {
       })
       .catch((error: any): void => {
         subscriber.error(error);
+        subscriber.complete();
       });
   });
 
   return observable$;
 }
 
-const FirebaseSDK = { getCollectionDocs };
+const FirebaseSDK = {
+  firestoreDB,
+  getCollectionDocs,
+  login,
+  logout,
+  authStateChange,
+};
 export default FirebaseSDK;

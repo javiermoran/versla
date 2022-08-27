@@ -2,6 +2,7 @@ import { AppBar, Toolbar, Button } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { Box } from '@mui/system';
 import { Link } from 'react-router-dom';
+import UserContextMenu from './UserContextMenu';
 
 interface IPage {
   id: number;
@@ -29,17 +30,19 @@ function Header(): ReactElement {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map(
               (page: IPage): ReactElement => (
-                <Link className='versla-header__link' to={page.route}>
-                  <Button
-                    key={page.id}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
-                  >
+                <Link
+                  key={`link-${page.id}`}
+                  className='versla-header__link'
+                  to={page.route}
+                >
+                  <Button sx={{ my: 2, color: 'white', display: 'block' }}>
                     {page.label}
                   </Button>
                 </Link>
               )
             )}
           </Box>
+          <UserContextMenu />
         </Toolbar>
       </AppBar>
     </header>
