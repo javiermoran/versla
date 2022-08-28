@@ -33,9 +33,9 @@ function login(): void {
   signInWithPopup(auth, provider);
 }
 
-function logout(): void {
+function logout(): Promise<any> {
   const auth = getAuth();
-  signOut(auth);
+  return signOut(auth);
 }
 
 function getCollectionDocs(query: any = {}): Observable<DocumentData[]> {

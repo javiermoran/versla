@@ -7,9 +7,9 @@ interface ILoginProtected {
 }
 
 const LoginProtected = ({ children }: ILoginProtected): ReactElement => {
-  const [user] = useContext(UserContext);
+  const [userContext] = useContext(UserContext);
 
-  return !!user ? <div>{children}</div> : <Login />;
+  return !!userContext?.user ? <div>{children}</div> : <Login />;
 };
 
 export default LoginProtected;

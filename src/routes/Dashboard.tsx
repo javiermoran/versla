@@ -1,7 +1,8 @@
 import React, { ReactElement } from 'react';
+import VerslaContainer from '../components/VerslaContainer';
 
 const Dashboard = (): ReactElement => {
-  return <div>Dashboard</div>;
+  return <VerslaContainer title='Dashboard'></VerslaContainer>;
 };
 
 export default Dashboard;

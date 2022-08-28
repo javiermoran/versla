@@ -5,15 +5,16 @@ import { Link } from 'react-router-dom';
 import UserContextMenu from './UserContextMenu';
 
 interface IPage {
-  id: number;
+  id: string;
   label: string;
   route: string;
 }
 
 const pages: IPage[] = [
-  { id: 1, label: 'Productos', route: '/products' },
-  { id: 2, label: 'Tiendas', route: '/stores' },
-  { id: 3, label: 'Listas', route: '/lists' },
+  { id: 'cat', label: 'Categorías', route: '/categories' },
+  { id: 'prod', label: 'Productos', route: '/products' },
+  { id: 'stor', label: 'Tiendas', route: '/stores' },
+  { id: 'list', label: 'Listas', route: '/lists' },
 ];
 
 function Header(): ReactElement {

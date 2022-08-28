@@ -1,60 +1,92 @@
 import { Avatar, Button, Menu, MenuItem } from '@mui/material';
 import { UserInfo } from 'firebase/auth';
-import React, { ReactElement, useContext, useState } from 'react';
+import { DocumentData } from 'firebase/firestore/lite';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
+import { finalize, take } from 'rxjs';
+import LoadingContext from '../context/LoadingContext';
 import UserContext from '../context/UserContext';
 import FirebaseSDK from '../lib/firebase/firebaseSDK';
+import * as OrganizationsService from '../lib/services/organizationsService';
 
 const UserContextMenu = (): ReactElement => {
   const [userContext, setUserContext] = useContext(UserContext);
+  const [, setLoadingContext] = useContext(LoadingContext);
   const [authVerified, setAuthVerified] = useState<boolean>();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = (): void => {
-    setAnchorEl(null);
-  };
 
-  const logout = (): void => {
-    FirebaseSDK.logout();
-    setAnchorEl(null);
+  useEffect((): void => {
+    setLoadingContext({ global: true });
+  }, [setLoadingContext]);
+
+  const logout = async (): Promise<any> => {
+    await FirebaseSDK.logout();
     setAuthVerified(false);
+    setAnchorEl(null);
     setUserContext(null);
   };
 
-  FirebaseSDK.authStateChange((data: UserInfo): void => {
+  const getOrganizations = (user: UserInfo): void => {
+    OrganizationsService.getOrganizations(user?.uid)
+      .pipe(
+        take(1),
+        finalize((): void => {
+          setLoadingContext({ global: false });
+        })
+      )
+      .subscribe((organizations: DocumentData[]): void => {
+        setUserContext({
+          user,
+          organizations,
+          selectedOrg: organizations[0],
+        });
+      });
+  };
+
+  FirebaseSDK.authStateChange((user: UserInfo): void => {
     if (!authVerified) {
-      setUserContext(data);
+      console.log(user);
+      if (user) {
+        setUserContext({ user });
+        getOrganizations(user);
+      } else {
+        console.log('no user');
+        setLoadingContext({ global: false });
+        setUserContext(null);
+      }
       setAuthVerified(true);
     }
   });
 
-  const renderUser = (user: UserInfo): ReactElement => {
+  const renderUser = (): ReactElement => {
     return (
       <div className='versla-user-context' id='user-context-container'>
         <Button
-          onClick={openMenu}
+          onClick={(event: React.MouseEvent<HTMLButtonElement>): void => {
+            setAnchorEl(event.currentTarget);
+          }}
           sx={{ my: 2, color: 'white', display: 'inline' }}
         >
-          {userContext?.displayName}
+          {userContext?.user?.displayName}
         </Button>
         <Menu
           id='basic-menu'
           anchorEl={anchorEl}
           open={open}
-          onClose={handleClose}
+          onClose={(): void => {
+            setAnchorEl(null);
+          }}
           MenuListProps={{
             'aria-labelledby': 'basic-button',
           }}
         >
-          <MenuItem onClick={handleClose}>My account</MenuItem>
+          <MenuItem>My account</MenuItem>
           <MenuItem onClick={logout}>Logout</MenuItem>
         </Menu>
         <Avatar
           imgProps={{ referrerPolicy: 'no-referrer' }}
-          alt={userContext?.displayName || ''}
-          src={userContext?.photoURL || ''}
+          alt={userContext?.user?.displayName || ''}
+          src={userContext?.user?.photoURL || ''}
         />
       </div>
     );
@@ -69,9 +101,7 @@ const UserContextMenu = (): ReactElement => {
     </Button>
   );
 
-  return (
-    <div>{!!userContext ? renderUser(userContext) : renderLoginButton()}</div>
-  );
+  return !!userContext ? renderUser() : renderLoginButton();
 };
 
 export default UserContextMenu;
