@@ -20,3 +20,8 @@ code {
   font-size: 35px;
   margin-right: 20px;
 }
+
+div.MuiTextField-root,
+div.MuiInputBase-root {
+  display: block;
+}
