@@ -7,10 +7,11 @@ import {
   signOut,
 } from 'firebase/auth';
 import {
-  collection,
   DocumentData,
   Firestore,
   getDocs,
+  collection,
+  addDoc,
   getFirestore,
   QueryDocumentSnapshot,
   QuerySnapshot,
@@ -43,7 +44,10 @@ function getCollectionDocs(query: any = {}): Observable<DocumentData[]> {
     getDocs(query)
       .then((snapshot: QuerySnapshot<any>): void => {
         const list = snapshot.docs.map(
-          (doc: QueryDocumentSnapshot<DocumentData>): DocumentData => doc.data()
+          (doc: QueryDocumentSnapshot<DocumentData>): DocumentData => ({
+            ...doc.data(),
+            uid: doc.id,
+          })
         );
         subscriber.next(list);
         subscriber.complete();
@@ -57,9 +61,28 @@ function getCollectionDocs(query: any = {}): Observable<DocumentData[]> {
   return observable$;
 }
 
+function createCollectionDocument(
+  table: string,
+  document: any
+): Observable<any> {
+  const $observable = new Observable((subscriber: Subscriber<any>): void => {
+    addDoc(collection(firestoreDB, table), document)
+      .then((data: any): void => {
+        subscriber.next(data);
+        subscriber.complete();
+      })
+      .catch((error: any): void => {
+        subscriber.error(error);
+        subscriber.complete();
+      });
+  });
+  return $observable;
+}
+
 const FirebaseSDK = {
   firestoreDB,
   getCollectionDocs,
+  createCollectionDocument,
   login,
   logout,
   authStateChange,

@@ -8,7 +8,7 @@ const LoadingBackdrop = (): ReactElement => {
 
   return (
     <Backdrop
-      sx={{ color: '#fff', zIndex: 1000 }}
+      sx={{ color: '#fff', zIndex: 10000, backgroundColor: 'primary.main' }}
       open={loadingContext?.global}
     >
       <DynamicLogo />

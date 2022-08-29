@@ -1,4 +1,4 @@
-import { Container, Paper, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import React, { ReactElement } from 'react';
 
 interface IVerslaContainerProps {
@@ -14,7 +14,7 @@ const VerslaContainer = ({
 }: IVerslaContainerProps): ReactElement => {
   return (
     <div className='versla-container'>
-      <Paper variant='outlined' sx={{ p: 1 }}>
+      <Box sx={{ p: 1 }}>
         <div className='versla-container__header'>
           <div className='versla-container__header__title'>
             {title && (
@@ -25,10 +25,8 @@ const VerslaContainer = ({
           </div>
           <div className='versla-container__header__action'>{actionEl}</div>
         </div>
-        <Container maxWidth='md'>
-          <div>{children}</div>
-        </Container>
-      </Paper>
+        <Container maxWidth='md'>{children}</Container>
+      </Box>
     </div>
   );
 };

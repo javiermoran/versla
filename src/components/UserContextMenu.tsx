@@ -31,7 +31,9 @@ const UserContextMenu = (): ReactElement => {
       .pipe(
         take(1),
         finalize((): void => {
-          setLoadingContext({ global: false });
+          setTimeout(() => {
+            setLoadingContext({ global: false });
+          }, 1000);
         })
       )
       .subscribe((organizations: DocumentData[]): void => {
@@ -45,12 +47,10 @@ const UserContextMenu = (): ReactElement => {
 
   FirebaseSDK.authStateChange((user: UserInfo): void => {
     if (!authVerified) {
-      console.log(user);
       if (user) {
         setUserContext({ user });
         getOrganizations(user);
       } else {
-        console.log('no user');
         setLoadingContext({ global: false });
         setUserContext(null);
       }
